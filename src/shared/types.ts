@@ -64,6 +64,11 @@ export interface ImportResult {
   skipped: string[];
 }
 
+// Re-exported for convenience so callers can import from one place.
+export type { FeatureSettings, FeatureId, CrosshairStyle } from './features';
+import type { FeatureSettings } from './features';
+type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
+
 export interface LauncherSettings {
   theme: 'dark' | 'light';
   javaPath?: string;
@@ -109,6 +114,14 @@ export interface UCApi {
   };
   launch: {
     start(profileId: string): Promise<{ pid: number } | { error: string }>;
+  };
+  features: {
+    get(profileId: string): Promise<FeatureSettings>;
+    update(
+      profileId: string,
+      patch: DeepPartial<FeatureSettings>
+    ): Promise<FeatureSettings>;
+    reset(profileId: string): Promise<FeatureSettings>;
   };
 }
 

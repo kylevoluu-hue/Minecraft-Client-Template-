@@ -3,8 +3,11 @@ import { CATEGORIES } from '@shared/categories';
 import { LaunchBar } from '../components/LaunchBar';
 
 export function HomePage(): JSX.Element {
-  const { mods, shaders, profiles, setActiveCategory } = useStore();
+  const { mods, shaders, profiles, features, setActiveCategory } = useStore();
   const enabledCount = mods.filter((m) => m.enabled).length;
+  const featureCount = Object.values(features).filter(
+    (v: any) => v?.enabled
+  ).length;
 
   return (
     <>
@@ -12,7 +15,8 @@ export function HomePage(): JSX.Element {
       <p className="uc-page-sub">
         {profiles.length} profile{profiles.length === 1 ? '' : 's'} •{' '}
         {mods.length} mods ({enabledCount} enabled) • {shaders.length} shader
-        pack{shaders.length === 1 ? '' : 's'}
+        pack{shaders.length === 1 ? '' : 's'} • {featureCount} client feature
+        {featureCount === 1 ? '' : 's'} on
       </p>
 
       <div className="uc-grid">

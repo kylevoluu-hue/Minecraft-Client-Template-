@@ -45,6 +45,12 @@ const api: UCApi = {
   },
   launch: {
     start: (profileId) => ipcRenderer.invoke('launch:start', profileId)
+  },
+  features: {
+    get: (profileId) => ipcRenderer.invoke('features:get', profileId),
+    update: (profileId, patch) =>
+      ipcRenderer.invoke('features:update', profileId, patch),
+    reset: (profileId) => ipcRenderer.invoke('features:reset', profileId)
   }
 };
 

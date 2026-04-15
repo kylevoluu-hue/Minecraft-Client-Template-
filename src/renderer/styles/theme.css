@@ -294,6 +294,101 @@ button { font-family: inherit; }
   animation: uc-fade-in 200ms ease-out;
 }
 
+/* ---------- Client Features page ---------- */
+.uc-feat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.uc-feat-card {
+  background: var(--uc-panel);
+  border: 1px solid var(--uc-border);
+  border-radius: var(--uc-radius);
+  padding: 14px 18px;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.uc-feat-card.on {
+  border-color: var(--uc-accent);
+  box-shadow: 0 0 0 1px rgba(124, 92, 255, 0.25),
+              0 4px 20px rgba(124, 92, 255, 0.12);
+}
+.uc-feat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.uc-feat-head-right {
+  display: flex; align-items: center; gap: 14px;
+}
+.uc-feat-title {
+  display: flex; gap: 14px; align-items: center;
+}
+.uc-feat-icon {
+  font-size: 28px;
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--uc-bg-3);
+  border: 1px solid var(--uc-border);
+  border-radius: var(--uc-radius);
+}
+.uc-feat-name { font-weight: 600; font-size: 15px; }
+.uc-feat-desc { color: var(--uc-text-dim); font-size: 12.5px; margin-top: 2px; }
+.uc-feat-body {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--uc-border);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 18px;
+}
+
+.uc-control {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+  color: var(--uc-text);
+}
+.uc-control-label {
+  width: 80px;
+  color: var(--uc-text-dim);
+  font-size: 12.5px;
+}
+.uc-control input[type="range"] {
+  flex: 1;
+  accent-color: var(--uc-accent);
+}
+.uc-control input[type="color"] {
+  width: 32px; height: 28px;
+  background: transparent;
+  border: 1px solid var(--uc-border);
+  border-radius: var(--uc-radius-sm);
+  padding: 2px;
+  cursor: pointer;
+}
+.uc-control-value {
+  min-width: 48px;
+  color: var(--uc-text-dim);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  text-align: right;
+}
+.uc-control-check { gap: 8px; }
+.uc-control-check input { accent-color: var(--uc-accent); }
+.uc-control-radio { flex-direction: column; align-items: flex-start; }
+.uc-radio-group {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.uc-radio-group .uc-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.uc-crosshair-preview {
+  border-radius: var(--uc-radius-sm);
+  overflow: hidden;
+  line-height: 0;
+}
+
 /* ---------- Launch bar ---------- */
 .uc-launchbar {
   position: sticky; bottom: 0;

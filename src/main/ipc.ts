@@ -6,6 +6,7 @@ import * as shaders from './shaders';
 import * as settings from './settings';
 import { startMinecraft } from './launcher';
 import { pickJars, pickShaderZips } from './dialogs';
+import * as features from './features';
 
 /**
  * Registers every IPC handler. Channel names mirror the `UCApi` shape in
@@ -116,6 +117,21 @@ export function registerIpc(): void {
   ipcMain.handle('launch:start', (_e, profileId) => {
     assertId(profileId);
     return startMinecraft(profileId);
+  });
+
+  // --- built-in client features ---
+  ipcMain.handle('features:get', (_e, profileId) => {
+    assertId(profileId);
+    return features.getFeatures(profileId);
+  });
+  ipcMain.handle('features:update', (_e, profileId, patch) => {
+    assertId(profileId);
+    assertObject(patch, 'feature patch');
+    return features.updateFeatures(profileId, patch as any);
+  });
+  ipcMain.handle('features:reset', (_e, profileId) => {
+    assertId(profileId);
+    return features.resetFeatures(profileId);
   });
 }
 

@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import type {
   CategoryId,
+  FeatureSettings,
   Mod,
   Profile,
   Shader
 } from '@shared/types';
+import { DEFAULT_FEATURE_SETTINGS } from '@shared/features';
 
 type SortKey = 'name' | 'category' | 'enabled';
 
@@ -13,9 +15,10 @@ interface UCState {
   activeProfileId: string | null;
   mods: Mod[];
   shaders: Shader[];
+  features: FeatureSettings;
 
   // UI
-  activeCategory: CategoryId | 'home' | 'settings';
+  activeCategory: CategoryId | 'home' | 'settings' | 'features';
   search: string;
   sort: SortKey;
 
@@ -29,6 +32,8 @@ interface UCState {
   toggleMod: (modId: string, enabled: boolean) => Promise<void>;
   selectShader: (shaderId: string | null) => Promise<void>;
   launch: () => Promise<{ pid: number } | { error: string }>;
+  patchFeatures: (patch: any) => Promise<void>;
+  resetFeatures: () => Promise<void>;
 }
 
 export const useStore = create<UCState>((set, get) => ({
@@ -36,6 +41,7 @@ export const useStore = create<UCState>((set, get) => ({
   activeProfileId: null,
   mods: [],
   shaders: [],
+  features: DEFAULT_FEATURE_SETTINGS,
   activeCategory: 'home',
   search: '',
   sort: 'name',
@@ -54,7 +60,10 @@ export const useStore = create<UCState>((set, get) => ({
     const shaders = activeProfileId
       ? await window.uc.shaders.scan(activeProfileId)
       : [];
-    set({ profiles, activeProfileId, mods, shaders });
+    const features = activeProfileId
+      ? await window.uc.features.get(activeProfileId)
+      : DEFAULT_FEATURE_SETTINGS;
+    set({ profiles, activeProfileId, mods, shaders, features });
   },
 
   setActiveProfile: async (id) => {
@@ -87,5 +96,19 @@ export const useStore = create<UCState>((set, get) => ({
     const { activeProfileId } = get();
     if (!activeProfileId) return { error: 'No active profile' };
     return window.uc.launch.start(activeProfileId);
+  },
+
+  patchFeatures: async (patch) => {
+    const { activeProfileId } = get();
+    if (!activeProfileId) return;
+    const next = await window.uc.features.update(activeProfileId, patch);
+    set({ features: next });
+  },
+
+  resetFeatures: async () => {
+    const { activeProfileId } = get();
+    if (!activeProfileId) return;
+    const next = await window.uc.features.reset(activeProfileId);
+    set({ features: next });
   }
 }));

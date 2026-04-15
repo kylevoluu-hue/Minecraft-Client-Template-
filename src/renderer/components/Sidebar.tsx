@@ -30,6 +30,13 @@ export function Sidebar(): JSX.Element {
 
       <div className="uc-nav-section">Launcher</div>
       <button
+        className={`uc-nav-btn ${active === 'features' ? 'active' : ''}`}
+        onClick={() => setActive('features')}
+      >
+        <span className="uc-nav-icon">✨</span>
+        Client Features
+      </button>
+      <button
         className={`uc-nav-btn ${active === 'settings' ? 'active' : ''}`}
         onClick={() => setActive('settings')}
       >
