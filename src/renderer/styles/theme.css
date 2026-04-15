@@ -236,3 +236,274 @@ button { font-family: inherit; }
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--uc-accent); }
+
+/* =====================================================================
+   Start Menu — animated galaxy background
+   ===================================================================== */
+.uc-start {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%,
+    #1a1233 0%, #0a0815 55%, #05050c 100%);
+  animation: uc-start-in 700ms ease-out;
+}
+.uc-start.leaving {
+  animation: uc-start-out 450ms ease-in forwards;
+}
+
+@keyframes uc-start-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes uc-start-out {
+  to { opacity: 0; transform: scale(0.98); filter: blur(6px); }
+}
+
+/* ---- Galaxy layers ---- */
+.uc-galaxy {
+  position: absolute; inset: 0;
+  perspective: 600px;
+}
+
+/* Nebula blobs drift slowly and pulse in hue. */
+.uc-nebula {
+  position: absolute;
+  width: 60vmax; height: 60vmax;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: uc-drift 40s ease-in-out infinite alternate;
+}
+.uc-nebula-a {
+  background: radial-gradient(circle, #7c5cff 0%, transparent 60%);
+  top: -10%; left: -15%;
+}
+.uc-nebula-b {
+  background: radial-gradient(circle, #58a6ff 0%, transparent 60%);
+  bottom: -20%; right: -10%;
+  animation-duration: 55s;
+  animation-direction: alternate-reverse;
+}
+.uc-nebula-c {
+  background: radial-gradient(circle, #ff5ca7 0%, transparent 65%);
+  top: 30%; left: 45%;
+  width: 40vmax; height: 40vmax;
+  opacity: 0.35;
+  animation-duration: 65s;
+}
+@keyframes uc-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(4%, -3%) scale(1.08); }
+  100% { transform: translate(-3%, 4%) scale(0.95); }
+}
+
+/* Starfields: three layers, parallax via different speeds. Each layer
+   uses a huge box-shadow string to place hundreds of 1-2px "stars"
+   with no JS and no image assets. */
+.uc-stars, .uc-stars::after {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1px; height: 1px;
+  border-radius: 50%;
+  background: transparent;
+}
+.uc-stars::after {
+  content: "";
+  top: 2000px; /* duplicate for seamless vertical loop */
+}
+
+.uc-stars-1 {
+  box-shadow:
+    120px 340px #fff, 420px 120px #fff, 810px 220px #cfd7ff, 1200px 90px #fff,
+    1550px 480px #fff, 80px 780px #fff, 340px 620px #dbe3ff, 640px 900px #fff,
+    980px 700px #fff, 1300px 860px #fff, 1780px 760px #cfd7ff, 260px 1120px #fff,
+    560px 1340px #fff, 900px 1240px #fff, 1260px 1180px #fff, 1600px 1420px #fff,
+    40px 1680px #fff, 420px 1780px #cfd7ff, 760px 1600px #fff, 1100px 1820px #fff,
+    1440px 1720px #fff, 1820px 1900px #fff, 200px 60px #fff, 700px 420px #fff,
+    1050px 380px #fff, 1400px 560px #cfd7ff, 1700px 240px #fff, 500px 1020px #fff,
+    1160px 1040px #fff, 1520px 980px #fff;
+  animation: uc-star-scroll 180s linear infinite;
+}
+.uc-stars-2 {
+  box-shadow:
+    160px 220px #fff, 520px 80px #fff, 900px 420px #fff, 1320px 300px #a5b4ff,
+    1680px 120px #fff, 240px 620px #fff, 720px 520px #fff, 1080px 820px #a5b4ff,
+    1460px 720px #fff, 1800px 580px #fff, 80px 960px #fff, 480px 1100px #fff,
+    820px 1220px #fff, 1240px 1060px #fff, 1620px 1260px #a5b4ff, 340px 1440px #fff,
+    700px 1500px #fff, 1040px 1380px #fff, 1400px 1560px #fff, 1760px 1640px #fff,
+    120px 1820px #fff, 600px 1760px #fff, 940px 1860px #a5b4ff, 1380px 1900px #fff;
+  width: 2px; height: 2px;
+  animation: uc-star-scroll 120s linear infinite;
+}
+.uc-stars-3 {
+  box-shadow:
+    300px 180px #fff, 740px 340px #c8a5ff, 1160px 240px #fff,
+    260px 900px #fff, 780px 1080px #c8a5ff, 1240px 960px #fff, 1680px 1160px #fff,
+    460px 1480px #fff, 1020px 1620px #c8a5ff, 1500px 1780px #fff,
+    180px 420px #fff, 1580px 420px #fff;
+  width: 3px; height: 3px;
+  filter: drop-shadow(0 0 4px #fff);
+  animation: uc-star-scroll 80s linear infinite, uc-twinkle 4s ease-in-out infinite;
+}
+
+@keyframes uc-star-scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-2000px); }
+}
+@keyframes uc-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* Shooting stars — diagonal streaks at random intervals. */
+.uc-shooting {
+  position: absolute;
+  top: 10%; left: -10%;
+  width: 160px; height: 2px;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  filter: drop-shadow(0 0 6px #fff);
+  transform: rotate(18deg);
+  opacity: 0;
+  animation: uc-shoot 7s ease-in infinite;
+}
+.uc-shooting-2 {
+  top: 35%; left: -10%;
+  animation-delay: 3.5s;
+  animation-duration: 9s;
+  transform: rotate(24deg);
+}
+@keyframes uc-shoot {
+  0%   { transform: translate(0, 0) rotate(18deg); opacity: 0; }
+  5%   { opacity: 1; }
+  40%  { opacity: 1; }
+  60%  { transform: translate(120vw, 40vh) rotate(18deg); opacity: 0; }
+  100% { transform: translate(120vw, 40vh) rotate(18deg); opacity: 0; }
+}
+
+/* ---- Foreground content ---- */
+.uc-start-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px;
+  text-align: center;
+  animation: uc-rise 900ms cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes uc-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Brand logo mark: a core with two orbiting rings. */
+.uc-logo {
+  position: relative;
+  width: 110px; height: 110px;
+  margin-bottom: 8px;
+}
+.uc-logo-core {
+  position: absolute; inset: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c5cff, #58a6ff);
+  box-shadow:
+    0 0 30px rgba(124,92,255,0.8),
+    0 0 60px rgba(88,166,255,0.5);
+  animation: uc-pulse 2.6s ease-in-out infinite;
+}
+.uc-logo-ring {
+  position: absolute; inset: 0;
+  border: 1.5px solid rgba(124,92,255,0.55);
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: uc-spin 6s linear infinite;
+}
+.uc-logo-ring-2 {
+  inset: 14px;
+  border-color: rgba(88,166,255,0.5);
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  animation: uc-spin 4s linear infinite reverse;
+}
+@keyframes uc-spin { to { transform: rotate(360deg); } }
+@keyframes uc-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50%      { transform: scale(1.08); filter: brightness(1.25); }
+}
+
+.uc-start-title {
+  margin: 0;
+  font-size: 54px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #e6e9f2 0%, #7c5cff 50%, #58a6ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: uc-shimmer 6s linear infinite;
+}
+@keyframes uc-shimmer {
+  to { background-position: 200% center; }
+}
+
+.uc-start-tag {
+  margin: 0 0 14px;
+  color: var(--uc-text-dim);
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+
+.uc-start-btn {
+  background: linear-gradient(135deg, #7c5cff, #58a6ff);
+  border: 0;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 40px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow:
+    0 6px 24px rgba(124,92,255,0.45),
+    0 0 0 0 rgba(124,92,255,0.5);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+  animation: uc-btn-glow 2.4s ease-in-out infinite;
+}
+.uc-start-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow:
+    0 10px 32px rgba(124,92,255,0.6),
+    0 0 0 6px rgba(124,92,255,0.18);
+}
+.uc-start-btn:active { transform: translateY(0) scale(0.99); }
+@keyframes uc-btn-glow {
+  0%, 100% { box-shadow: 0 6px 24px rgba(124,92,255,0.45), 0 0 0 0 rgba(124,92,255,0.5); }
+  50%      { box-shadow: 0 6px 24px rgba(88,166,255,0.55), 0 0 0 10px rgba(124,92,255,0); }
+}
+
+.uc-start-meta {
+  margin-top: 10px;
+  color: var(--uc-text-dim);
+  font-size: 12.5px;
+}
+.uc-start-hint {
+  opacity: 0.6;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uc-stars, .uc-stars-1, .uc-stars-2, .uc-stars-3,
+  .uc-nebula, .uc-shooting, .uc-start-btn,
+  .uc-logo-core, .uc-logo-ring, .uc-start-title {
+    animation: none !important;
+  }
+}

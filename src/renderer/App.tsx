@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from './state/store';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
+import { StartMenu } from './components/StartMenu';
 import { HomePage } from './pages/HomePage';
 import { CategoryPage } from './pages/CategoryPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -9,10 +10,15 @@ import { SettingsPage } from './pages/SettingsPage';
 export function App(): JSX.Element {
   const active = useStore((s) => s.activeCategory);
   const refreshAll = useStore((s) => s.refreshAll);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     refreshAll();
   }, [refreshAll]);
+
+  if (!started) {
+    return <StartMenu onEnter={() => setStarted(true)} />;
+  }
 
   return (
     <div className="uc-app">
