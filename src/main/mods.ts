@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
 import { join, basename } from 'node:path';
+import { shell } from 'electron';
 import type { CategoryId, Mod } from '@shared/types';
 import { guessCategory } from '@shared/categories';
 import { overridesFile } from './paths';
@@ -7,6 +8,70 @@ import { readJson, writeJson } from './storage';
 import { listProfiles } from './profiles';
 
 const DISABLED_SUFFIX = '.disabled';
+
+export async function getModsDir(profileId: string): Promise<string> {
+  const gameDir = await profileGameDir(profileId);
+  const dir = join(gameDir, 'mods');
+  await fs.mkdir(dir, { recursive: true });
+  return dir;
+}
+
+/** Opens the profile's mods/ folder in the OS file manager. */
+export async function openModsFolder(profileId: string): Promise<string> {
+  const dir = await getModsDir(profileId);
+  const err = await shell.openPath(dir);
+  if (err) throw new Error(err);
+  return dir;
+}
+
+/**
+ * Copies user-provided .jar files into the profile's mods/ folder.
+ * Accepts absolute paths (from a file picker or drag-and-drop).
+ * Skips anything that isn't a .jar and any file that already exists
+ * (to avoid silently clobbering the user's current copy).
+ */
+export async function importMods(
+  profileId: string,
+  sourcePaths: string[]
+): Promise<{ imported: string[]; skipped: string[] }> {
+  const modsDir = await getModsDir(profileId);
+  const imported: string[] = [];
+  const skipped: string[] = [];
+
+  for (const src of sourcePaths) {
+    const name = basename(src);
+    if (!name.toLowerCase().endsWith('.jar')) {
+      skipped.push(`${name} (not a .jar)`);
+      continue;
+    }
+    const dest = join(modsDir, name);
+    try {
+      await fs.copyFile(src, dest, fs.constants.COPYFILE_EXCL);
+      imported.push(name);
+    } catch (err: any) {
+      if (err.code === 'EEXIST') skipped.push(`${name} (already exists)`);
+      else skipped.push(`${name} (${err.message})`);
+    }
+  }
+
+  return { imported, skipped };
+}
+
+/** Deletes a mod file from disk. */
+export async function deleteMod(
+  profileId: string,
+  modId: string
+): Promise<void> {
+  const modsDir = await getModsDir(profileId);
+  for (const candidate of [modId, modId + DISABLED_SUFFIX]) {
+    const p = join(modsDir, candidate);
+    try {
+      await fs.unlink(p);
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') throw err;
+    }
+  }
+}
 
 interface OverrideStore {
   /** modId -> category override chosen by the user */

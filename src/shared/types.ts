@@ -59,6 +59,11 @@ export interface Profile {
   updatedAt: number;
 }
 
+export interface ImportResult {
+  imported: string[];
+  skipped: string[];
+}
+
 export interface LauncherSettings {
   theme: 'dark' | 'light';
   javaPath?: string;
@@ -81,10 +86,22 @@ export interface UCApi {
     scan(profileId: string): Promise<Mod[]>;
     setEnabled(profileId: string, modId: string, enabled: boolean): Promise<Mod>;
     setCategory(modId: string, category: CategoryId): Promise<void>;
+    /** Open the profile's mods/ folder in the OS file manager. */
+    openFolder(profileId: string): Promise<string>;
+    /** Pick .jar files via native file dialog and copy them in. */
+    pickAndImport(profileId: string): Promise<ImportResult>;
+    /** Import a list of absolute .jar paths (e.g. from drag-and-drop). */
+    importPaths(profileId: string, paths: string[]): Promise<ImportResult>;
+    /** Permanently delete a mod file (both enabled and disabled variants). */
+    remove(profileId: string, modId: string): Promise<void>;
   };
   shaders: {
     scan(profileId: string): Promise<Shader[]>;
     select(profileId: string, shaderId: string | null): Promise<void>;
+    openFolder(profileId: string): Promise<string>;
+    pickAndImport(profileId: string): Promise<ImportResult>;
+    importPaths(profileId: string, paths: string[]): Promise<ImportResult>;
+    remove(profileId: string, shaderId: string): Promise<void>;
   };
   settings: {
     get(): Promise<LauncherSettings>;

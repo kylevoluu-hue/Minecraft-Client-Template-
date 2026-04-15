@@ -5,6 +5,7 @@ import * as mods from './mods';
 import * as shaders from './shaders';
 import * as settings from './settings';
 import { startMinecraft } from './launcher';
+import { pickJars, pickShaderZips } from './dialogs';
 
 /**
  * Registers every IPC handler. Channel names mirror the `UCApi` shape in
@@ -50,6 +51,26 @@ export function registerIpc(): void {
     if (typeof category !== 'string') throw new Error('category must be string');
     return mods.setModCategory(modId, category as any);
   });
+  ipcMain.handle('mods:openFolder', (_e, profileId) => {
+    assertId(profileId);
+    return mods.openModsFolder(profileId);
+  });
+  ipcMain.handle('mods:pickAndImport', async (_e, profileId) => {
+    assertId(profileId);
+    const paths = await pickJars();
+    if (paths.length === 0) return { imported: [], skipped: [] };
+    return mods.importMods(profileId, paths);
+  });
+  ipcMain.handle('mods:importPaths', (_e, profileId, paths) => {
+    assertId(profileId);
+    if (!Array.isArray(paths)) throw new Error('paths must be an array');
+    return mods.importMods(profileId, paths.filter((p) => typeof p === 'string'));
+  });
+  ipcMain.handle('mods:remove', (_e, profileId, modId) => {
+    assertId(profileId);
+    assertId(modId);
+    return mods.deleteMod(profileId, modId);
+  });
 
   // --- shaders ---
   ipcMain.handle('shaders:scan', (_e, profileId) => {
@@ -59,6 +80,29 @@ export function registerIpc(): void {
   ipcMain.handle('shaders:select', (_e, profileId, shaderId) => {
     assertId(profileId);
     return shaders.selectShader(profileId, shaderId ?? null);
+  });
+  ipcMain.handle('shaders:openFolder', (_e, profileId) => {
+    assertId(profileId);
+    return shaders.openShadersFolder(profileId);
+  });
+  ipcMain.handle('shaders:pickAndImport', async (_e, profileId) => {
+    assertId(profileId);
+    const paths = await pickShaderZips();
+    if (paths.length === 0) return { imported: [], skipped: [] };
+    return shaders.importShaders(profileId, paths);
+  });
+  ipcMain.handle('shaders:importPaths', (_e, profileId, paths) => {
+    assertId(profileId);
+    if (!Array.isArray(paths)) throw new Error('paths must be an array');
+    return shaders.importShaders(
+      profileId,
+      paths.filter((p) => typeof p === 'string')
+    );
+  });
+  ipcMain.handle('shaders:remove', (_e, profileId, shaderId) => {
+    assertId(profileId);
+    assertId(shaderId);
+    return shaders.deleteShader(profileId, shaderId);
   });
 
   // --- settings ---

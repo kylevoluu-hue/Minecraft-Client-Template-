@@ -17,12 +17,27 @@ const api: UCApi = {
     setEnabled: (profileId, modId, enabled) =>
       ipcRenderer.invoke('mods:setEnabled', profileId, modId, enabled),
     setCategory: (modId, category) =>
-      ipcRenderer.invoke('mods:setCategory', modId, category)
+      ipcRenderer.invoke('mods:setCategory', modId, category),
+    openFolder: (profileId) => ipcRenderer.invoke('mods:openFolder', profileId),
+    pickAndImport: (profileId) =>
+      ipcRenderer.invoke('mods:pickAndImport', profileId),
+    importPaths: (profileId, paths) =>
+      ipcRenderer.invoke('mods:importPaths', profileId, paths),
+    remove: (profileId, modId) =>
+      ipcRenderer.invoke('mods:remove', profileId, modId)
   },
   shaders: {
     scan: (profileId) => ipcRenderer.invoke('shaders:scan', profileId),
     select: (profileId, shaderId) =>
-      ipcRenderer.invoke('shaders:select', profileId, shaderId)
+      ipcRenderer.invoke('shaders:select', profileId, shaderId),
+    openFolder: (profileId) =>
+      ipcRenderer.invoke('shaders:openFolder', profileId),
+    pickAndImport: (profileId) =>
+      ipcRenderer.invoke('shaders:pickAndImport', profileId),
+    importPaths: (profileId, paths) =>
+      ipcRenderer.invoke('shaders:importPaths', profileId, paths),
+    remove: (profileId, shaderId) =>
+      ipcRenderer.invoke('shaders:remove', profileId, shaderId)
   },
   settings: {
     get: () => ipcRenderer.invoke('settings:get'),

@@ -182,6 +182,35 @@ See the `src/` tree in this repo. Key files to read first:
   Do not build features whose primary purpose is to provide an unfair
   multiplayer advantage.
 
+## Adding Your Own Mods and Shaders
+
+Each profile has its own isolated folder. You have three ways to add content:
+
+1. **In-app file picker** — go to any mod category (or Shader Packs) and
+   click **+ Add Mods** / **+ Add Shaders**. Pick one or more files; they
+   are copied into the active profile's folder.
+2. **Drag and drop** — drag `.jar` files onto any mod category page, or
+   `.zip` shader packs onto the Shader Packs page. A highlighted overlay
+   appears while dragging.
+3. **Open the folder directly** — click **📁 Open Folder** to reveal the
+   profile's `mods/` or `shaderpacks/` directory in your OS file manager,
+   then drop files in there. Click **↻ Refresh** to rescan.
+
+On disk, the per-profile layout is:
+
+```
+<userData>/instances/<profileId>/
+├── mods/            ← .jar files; .jar.disabled = toggled off
+├── shaderpacks/     ← .zip packs (Iris / Oculus also accept folders here)
+└── config/iris.properties   ← managed by the launcher
+```
+
+Remove a mod or shader with the **Remove** link on its card (this deletes
+the file; the disabled variant is cleaned up too). Disabling vs. removing:
+
+- **Toggle off** = file renamed to `.jar.disabled` — keep it, just don't load it.
+- **Remove**     = file deleted from disk.
+
 ## Expanding Later
 
 - **New category:** add an entry to `src/shared/categories.ts`.

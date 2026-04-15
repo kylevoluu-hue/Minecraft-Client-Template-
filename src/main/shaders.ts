@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
+import { shell } from 'electron';
 import type { Shader } from '@shared/types';
 import { listProfiles, updateProfile } from './profiles';
 
@@ -7,6 +8,67 @@ async function profileGameDir(profileId: string): Promise<string> {
   const profile = (await listProfiles()).find((p) => p.id === profileId);
   if (!profile) throw new Error(`Profile ${profileId} not found`);
   return profile.gameDir;
+}
+
+export async function getShadersDir(profileId: string): Promise<string> {
+  const gameDir = await profileGameDir(profileId);
+  const dir = join(gameDir, 'shaderpacks');
+  await fs.mkdir(dir, { recursive: true });
+  return dir;
+}
+
+export async function openShadersFolder(profileId: string): Promise<string> {
+  const dir = await getShadersDir(profileId);
+  const err = await shell.openPath(dir);
+  if (err) throw new Error(err);
+  return dir;
+}
+
+/**
+ * Copies user-provided shader packs (.zip) into the profile's shaderpacks/
+ * folder. Iris / Oculus also accept folder-style packs; those can be dropped
+ * in directly via the Open Folder button.
+ */
+export async function importShaders(
+  profileId: string,
+  sourcePaths: string[]
+): Promise<{ imported: string[]; skipped: string[] }> {
+  const dir = await getShadersDir(profileId);
+  const imported: string[] = [];
+  const skipped: string[] = [];
+
+  for (const src of sourcePaths) {
+    const name = basename(src);
+    if (!name.toLowerCase().endsWith('.zip')) {
+      skipped.push(`${name} (not a .zip)`);
+      continue;
+    }
+    const dest = join(dir, name);
+    try {
+      await fs.copyFile(src, dest, fs.constants.COPYFILE_EXCL);
+      imported.push(name);
+    } catch (err: any) {
+      if (err.code === 'EEXIST') skipped.push(`${name} (already exists)`);
+      else skipped.push(`${name} (${err.message})`);
+    }
+  }
+
+  return { imported, skipped };
+}
+
+export async function deleteShader(
+  profileId: string,
+  shaderId: string
+): Promise<void> {
+  const dir = await getShadersDir(profileId);
+  for (const candidate of [shaderId, shaderId + '.disabled']) {
+    const p = join(dir, candidate);
+    try {
+      await fs.unlink(p);
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') throw err;
+    }
+  }
 }
 
 export async function scanShaders(profileId: string): Promise<Shader[]> {

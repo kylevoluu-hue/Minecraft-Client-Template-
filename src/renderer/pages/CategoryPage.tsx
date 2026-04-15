@@ -4,6 +4,8 @@ import { getCategory } from '@shared/categories';
 import { useStore } from '../state/store';
 import { ModCard } from '../components/ModCard';
 import { LaunchBar } from '../components/LaunchBar';
+import { ImportToolbar } from '../components/ImportToolbar';
+import { DropZone } from '../components/DropZone';
 
 interface Props {
   categoryId: CategoryId;
@@ -12,6 +14,25 @@ interface Props {
 export function CategoryPage({ categoryId }: Props): JSX.Element {
   const { mods, shaders, search, sort, selectShader } = useStore();
   const cat = getCategory(categoryId);
+  const activeProfileId = useStore((s) => s.activeProfileId);
+  const refreshAll = useStore((s) => s.refreshAll);
+
+  // Hooks must run on every render path, so compute the mod list here
+  // even when we'll render the shader view.
+  const filteredMods = useMemo(() => {
+    const needle = search.toLowerCase();
+    const base = mods
+      .filter((m) => m.category === categoryId)
+      .filter((m) => !needle || m.name.toLowerCase().includes(needle));
+    return sortMods(base, sort);
+  }, [mods, categoryId, search, sort]);
+
+  async function removeShader(id: string, name: string): Promise<void> {
+    if (!activeProfileId) return;
+    if (!confirm(`Delete shader pack "${name}" from disk?`)) return;
+    await window.uc.shaders.remove(activeProfileId, id);
+    await refreshAll();
+  }
 
   // Shader category is a special view - one-of-N selection rather than toggles.
   if (categoryId === 'shaders') {
@@ -19,11 +40,13 @@ export function CategoryPage({ categoryId }: Props): JSX.Element {
       s.name.toLowerCase().includes(search.toLowerCase())
     );
     return (
-      <>
+      <DropZone kind="shaders">
         <h1 className="uc-page-title">
           {cat.icon} {cat.label}
         </h1>
         <p className="uc-page-sub">{cat.description}</p>
+
+        <ImportToolbar kind="shaders" />
 
         <div className="uc-grid">
           <article className="uc-card">
@@ -51,48 +74,53 @@ export function CategoryPage({ categoryId }: Props): JSX.Element {
                 />
               </div>
               <div className="uc-card-desc">Iris / Oculus shader pack.</div>
+              <div className="uc-card-meta">
+                <span style={{ flex: 1 }} />
+                <button
+                  className="uc-link-btn"
+                  onClick={() => removeShader(s.id, s.name)}
+                >
+                  Remove
+                </button>
+              </div>
             </article>
           ))}
         </div>
 
         <LaunchBar />
-      </>
+      </DropZone>
     );
   }
 
-  const filtered = useMemo(() => {
-    const needle = search.toLowerCase();
-    const base = mods
-      .filter((m) => m.category === categoryId)
-      .filter((m) => !needle || m.name.toLowerCase().includes(needle));
-    return sortMods(base, sort);
-  }, [mods, categoryId, search, sort]);
-
   return (
-    <>
+    <DropZone kind="mods">
       <h1 className="uc-page-title">
         {cat.icon} {cat.label}
       </h1>
       <p className="uc-page-sub">{cat.description}</p>
 
-      {filtered.length === 0 ? (
-        <div className="uc-card" style={{ maxWidth: 420 }}>
-          <div className="uc-card-title">Nothing here yet</div>
+      <ImportToolbar kind="mods" />
+
+      {filteredMods.length === 0 ? (
+        <div className="uc-card" style={{ maxWidth: 480 }}>
+          <div className="uc-card-title">No mods in this category yet</div>
           <div className="uc-card-desc">
-            Drop <code>.jar</code> files into your profile's{' '}
-            <code>mods/</code> folder and click a category to see them.
+            Click <strong>Add Mods</strong>, drag <code>.jar</code> files
+            anywhere on this page, or use <strong>Open Folder</strong> to
+            copy them in manually. Mods auto-categorize by name, and you
+            can always re-categorize them later.
           </div>
         </div>
       ) : (
         <div className="uc-grid">
-          {filtered.map((m) => (
+          {filteredMods.map((m) => (
             <ModCard key={m.id} mod={m} />
           ))}
         </div>
       )}
 
       <LaunchBar />
-    </>
+    </DropZone>
   );
 }
 
